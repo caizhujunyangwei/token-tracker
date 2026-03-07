@@ -1,0 +1,16 @@
+{
+  "name": "token-tracker",
+  "version": "1.0.0",
+  "description": "OpenClaw Token Usage Tracker with Web Dashboard",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "author": "杨哥 & 胖子",
+  "license": "MIT"
+}

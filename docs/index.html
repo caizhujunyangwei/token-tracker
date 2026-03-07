@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Token Tracker - 杨哥的 Token 账本</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat-label {
+      color: #666;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .chart-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .chart-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .sessions-table {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #333;
+    }
+    tr:hover {
+      background: #f8f9fa;
+    }
+    .model-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      background: #667eea;
+      color: white;
+    }
+    .loading {
+      text-align: center;
+      color: white;
+      font-size: 1.5em;
+      padding: 50px;
+    }
+    .refresh-btn {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 20px auto;
+      display: block;
+      transition: transform 0.2s;
+    }
+    .refresh-btn:hover {
+      transform: scale(1.05);
+    }
+    .last-update {
+      text-align: center;
+      color: white;
+      margin-top: 20px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Token Tracker</h1>
+    
+    <div id="loading" class="loading">加载中...</div>
+    
+    <div id="content" style="display: none;">
+      <!-- 统计卡片 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalSessions">0</div>
+          <div class="stat-label">总会话数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalInput">0</div>
+          <div class="stat-label">总输入 Tokens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalOutput">0</div>
+          <div class="stat-label">总输出 Tokens</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalTokens">0</div>
+          <div class="stat-label">总计 Tokens</div>
+        </div>
+      </div>
+
+      <!-- 图表 -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-title">📅 每日使用趋势</div>
+          <canvas id="dailyChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">🤖 模型使用分布</div>
+          <canvas id="modelChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 会话列表 -->
+      <div class="sessions-table">
+        <div class="chart-title">📋 最近会话记录</div>
+        <table>
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>模型</th>
+              <th>输入</th>
+              <th>输出</th>
+              <th>总计</th>
+            </tr>
+          </thead>
+          <tbody id="sessionsBody"></tbody>
+        </table>
+      </div>
+
+      <button class="refresh-btn" onclick="loadData()">🔄 刷新数据</button>
+      
+      <div class="last-update" id="lastUpdate"></div>
+    </div>
+  </div>
+
+  <script>
+    let dailyChart, modelChart;
+    
+    // GitHub Pages 部署时改用相对路径读取 data/usage.json
+    const DATA_URL = 'data/usage.json';
+
+    async function loadData() {
+      try {
+        // 添加时间戳避免缓存
+        const response = await fetch(`${DATA_URL}?t=${Date.now()}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        const sessions = data.sessions || [];
+
+        // 统计数据
+        const stats = {
+          total: { input: 0, output: 0, sessions: sessions.length },
+          byDate: {},
+          byModel: {}
+        };
+
+        sessions.forEach(s => {
+          const date = s.timestamp.split('T')[0];
+          const model = s.model || 'unknown';
+          
+          if (!stats.byDate[date]) {
+            stats.byDate[date] = { input: 0, output: 0, count: 0 };
+          }
+          stats.byDate[date].input += s.input || 0;
+          stats.byDate[date].output += s.output || 0;
+          stats.byDate[date].count += 1;
+          
+          if (!stats.byModel[model]) {
+            stats.byModel[model] = { input: 0, output: 0, count: 0 };
+          }
+          stats.byModel[model].input += s.input || 0;
+          stats.byModel[model].output += s.output || 0;
+          stats.byModel[model].count += 1;
+          
+          stats.total.input += s.input || 0;
+          stats.total.output += s.output || 0;
+        });
+
+        // 更新统计卡片
+        document.getElementById('totalSessions').textContent = stats.total.sessions.toLocaleString();
+        document.getElementById('totalInput').textContent = stats.total.input.toLocaleString();
+        document.getElementById('totalOutput').textContent = stats.total.output.toLocaleString();
+        document.getElementById('totalTokens').textContent = (stats.total.input + stats.total.output).toLocaleString();
+
+        // 更新表格
+        const tbody = document.getElementById('sessionsBody');
+        tbody.innerHTML = sessions.slice(-20).reverse().map(s => `
+          <tr>
+            <td>${new Date(s.timestamp).toLocaleString('zh-CN')}</td>
+            <td><span class="model-tag">${s.model || 'unknown'}</span></td>
+            <td>${(s.input || 0).toLocaleString()}</td>
+            <td>${(s.output || 0).toLocaleString()}</td>
+            <td>${((s.input || 0) + (s.output || 0)).toLocaleString()}</td>
+          </tr>
+        `).join('');
+
+        // 每日趋势图表
+        const dailyLabels = Object.keys(stats.byDate).sort();
+        const dailyData = dailyLabels.map(d => (stats.byDate[d].input + stats.byDate[d].output));
+        
+        if (dailyChart) dailyChart.destroy();
+        dailyChart = new Chart(document.getElementById('dailyChart'), {
+          type: 'line',
+          data: {
+            labels: dailyLabels,
+            datasets: [{
+              label: 'Tokens',
+              data: dailyData,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+
+        // 模型分布图表
+        const modelLabels = Object.keys(stats.byModel);
+        const modelData = modelLabels.map(m => stats.byModel[m].input + stats.byModel[m].output);
+        
+        if (modelChart) modelChart.destroy();
+        modelChart = new Chart(document.getElementById('modelChart'), {
+          type: 'doughnut',
+          data: {
+            labels: modelLabels,
+            datasets: [{
+              data: modelData,
+              backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b']
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' }
+            }
+          }
+        });
+
+        // 显示最后更新时间
+        const lastSession = sessions[sessions.length - 1];
+        if (lastSession) {
+          document.getElementById('lastUpdate').textContent = 
+            `最后更新：${new Date(lastSession.timestamp).toLocaleString('zh-CN')}`;
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+      } catch (e) {
+        document.getElementById('loading').textContent = '加载失败：' + e.message;
+        console.error('Load error:', e);
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

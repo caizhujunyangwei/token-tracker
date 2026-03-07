@@ -1,0 +1,31 @@
+{
+  "sessions": [
+    {
+      "id": "1741377600000",
+      "timestamp": "2026-03-07T18:00:00.000Z",
+      "model": "dashscope/qwen3.5-plus",
+      "input": 35000,
+      "output": 200,
+      "channel": "webchat",
+      "duration": 120
+    },
+    {
+      "id": "1741378200000",
+      "timestamp": "2026-03-07T18:10:00.000Z",
+      "model": "dashscope/qwen3.5-plus",
+      "input": 38000,
+      "output": 388,
+      "channel": "webchat",
+      "duration": 180
+    },
+    {
+      "id": "1741378800000",
+      "timestamp": "2026-03-07T18:20:00.000Z",
+      "model": "dashscope/qwen3.5-plus",
+      "input": 41000,
+      "output": 388,
+      "channel": "webchat",
+      "duration": 240
+    }
+  ]
+}

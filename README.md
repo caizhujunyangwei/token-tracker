@@ -2,6 +2,12 @@
 
 OpenClaw Token 使用追踪系统，带漂亮的 Web 仪表盘！
 
+## 🌐 在线访问
+
+**GitHub Pages:** https://caizhujunyangwei.github.io/token-tracker
+
+数据每小时自动更新！
+
 ## 功能特点
 
 - 📈 **实时统计** - 总会话数、Token 使用量一目了然
@@ -9,53 +15,39 @@ OpenClaw Token 使用追踪系统，带漂亮的 Web 仪表盘！
 - 🤖 **模型分析** - 了解各个模型的使用分布
 - 📋 **历史记录** - 详细的会话记录列表
 - 🎨 **漂亮界面** - 渐变色设计，图表美观
-
-## 快速开始
-
-### 安装
-
-```bash
-cd token-tracker
-npm install
-```
-
-### 启动
-
-```bash
-node server.js
-```
-
-### 访问
-
-打开浏览器访问：`http://localhost:6000`
+- ⏰ **自动更新** - GitHub Actions 每小时自动同步数据
 
 ## 项目结构
 
 ```
 token-tracker/
-├── server.js          # Web 服务器
+├── public/
+│   └── index.html     # Web 仪表盘（部署到 GitHub Pages）
+├── data/
+│   └── usage.json     # Token 数据（由 Actions 自动更新）
+├── server.js          # 本地开发服务器
 ├── recorder.js        # Token 记录模块
 ├── package.json       # 项目配置
 ├── README.md          # 说明文档
-├── public/
-│   └── index.html     # Web 仪表盘
-├── data/
-│   └── usage.json     # 数据存储（运行时生成）
-└── skills/
-    └── token-recorder/
-        └── SKILL.md   # OpenClaw skill
+└── .github/
+    └── workflows/
+        └── update-data.yml  # 每小时自动更新数据的 Actions
 ```
 
-## API
+## 本地开发
 
-### GET /api/usage
-获取所有会话记录
+```bash
+cd token-tracker
+npm install
+npm start
+```
 
-### GET /api/stats
-获取统计数据（按日期、按模型分组）
+访问：`http://localhost:8899`
 
-### POST /api/usage
-添加新的会话记录
+## 自动部署
+
+- **前端**: GitHub Pages 自动部署 `public/` 目录
+- **数据**: GitHub Actions 每小时从服务器拉取最新数据
 
 ## 集成 OpenClaw
 
@@ -63,9 +55,10 @@ token-tracker/
 
 ## 技术栈
 
-- **后端**: Node.js + Express
 - **前端**: HTML + Chart.js
-- **存储**: JSON 文件（无需数据库）
+- **后端**: Node.js + Express（仅用于本地开发）
+- **部署**: GitHub Pages + GitHub Actions
+- **存储**: JSON 文件
 
 ## 作者
 

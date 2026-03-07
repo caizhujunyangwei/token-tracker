@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = 6000;
+const PORT = 8899;
 
 // 数据文件路径
 const DATA_DIR = '/home/admin/.openclaw/workspace/tokens-data';

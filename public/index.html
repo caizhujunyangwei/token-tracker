@@ -119,6 +119,13 @@
     .refresh-btn:hover {
       transform: scale(1.05);
     }
+    .last-update {
+      text-align: center;
+      color: white;
+      margin-top: 20px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -178,21 +185,55 @@
       </div>
 
       <button class="refresh-btn" onclick="loadData()">🔄 刷新数据</button>
+      
+      <div class="last-update" id="lastUpdate"></div>
     </div>
   </div>
 
   <script>
     let dailyChart, modelChart;
+    
+    // GitHub Pages 部署时改用相对路径读取 data/usage.json
+    const DATA_URL = 'data/usage.json';
 
     async function loadData() {
       try {
-        const [usageRes, statsRes] = await Promise.all([
-          fetch('/api/usage'),
-          fetch('/api/stats')
-        ]);
-        
-        const usage = await usageRes.json();
-        const stats = await statsRes.json();
+        // 添加时间戳避免缓存
+        const response = await fetch(`${DATA_URL}?t=${Date.now()}`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        const sessions = data.sessions || [];
+
+        // 统计数据
+        const stats = {
+          total: { input: 0, output: 0, sessions: sessions.length },
+          byDate: {},
+          byModel: {}
+        };
+
+        sessions.forEach(s => {
+          const date = s.timestamp.split('T')[0];
+          const model = s.model || 'unknown';
+          
+          if (!stats.byDate[date]) {
+            stats.byDate[date] = { input: 0, output: 0, count: 0 };
+          }
+          stats.byDate[date].input += s.input || 0;
+          stats.byDate[date].output += s.output || 0;
+          stats.byDate[date].count += 1;
+          
+          if (!stats.byModel[model]) {
+            stats.byModel[model] = { input: 0, output: 0, count: 0 };
+          }
+          stats.byModel[model].input += s.input || 0;
+          stats.byModel[model].output += s.output || 0;
+          stats.byModel[model].count += 1;
+          
+          stats.total.input += s.input || 0;
+          stats.total.output += s.output || 0;
+        });
 
         // 更新统计卡片
         document.getElementById('totalSessions').textContent = stats.total.sessions.toLocaleString();
@@ -202,7 +243,7 @@
 
         // 更新表格
         const tbody = document.getElementById('sessionsBody');
-        tbody.innerHTML = usage.sessions.slice(-20).reverse().map(s => `
+        tbody.innerHTML = sessions.slice(-20).reverse().map(s => `
           <tr>
             <td>${new Date(s.timestamp).toLocaleString('zh-CN')}</td>
             <td><span class="model-tag">${s.model || 'unknown'}</span></td>
@@ -261,10 +302,18 @@
           }
         });
 
+        // 显示最后更新时间
+        const lastSession = sessions[sessions.length - 1];
+        if (lastSession) {
+          document.getElementById('lastUpdate').textContent = 
+            `最后更新：${new Date(lastSession.timestamp).toLocaleString('zh-CN')}`;
+        }
+
         document.getElementById('loading').style.display = 'none';
         document.getElementById('content').style.display = 'block';
       } catch (e) {
         document.getElementById('loading').textContent = '加载失败：' + e.message;
+        console.error('Load error:', e);
       }
     }
 

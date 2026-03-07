@@ -245,7 +245,7 @@
         const tbody = document.getElementById('sessionsBody');
         tbody.innerHTML = sessions.slice(-20).reverse().map(s => `
           <tr>
-            <td>${new Date(s.timestamp).toLocaleString('zh-CN')}</td>
+            <td>${new Date(s.timestamp).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</td>
             <td><span class="model-tag">${s.model || 'unknown'}</span></td>
             <td>${(s.input || 0).toLocaleString()}</td>
             <td>${(s.output || 0).toLocaleString()}</td>
@@ -306,7 +306,7 @@
         const lastSession = sessions[sessions.length - 1];
         if (lastSession) {
           document.getElementById('lastUpdate').textContent = 
-            `最后更新：${new Date(lastSession.timestamp).toLocaleString('zh-CN')}`;
+            `最后更新：${new Date(lastSession.timestamp).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`;
         }
 
         document.getElementById('loading').style.display = 'none';

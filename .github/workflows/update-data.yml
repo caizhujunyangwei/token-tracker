@@ -1,48 +1,22 @@
 name: 📊 Update Token Data
 
 on:
-  schedule:
-    # 每小时执行一次（UTC 时间）
-    - cron: '0 * * * *'
+  push:
+    paths:
+      - 'docs/data/usage.json'
   workflow_dispatch: # 允许手动触发
 
 jobs:
-  update-data:
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
+      
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          token: ${{ secrets.GH_TOKEN }}
-      
-      - name: 📁 Create data directory
-        run: mkdir -p data
-      
-      - name: 📊 Fetch token data from server
-        run: |
-          # 从服务器 API 获取最新数据
-          mkdir -p docs/data
-          curl -s --connect-timeout 10 "http://47.252.76.74:8899/api/usage" > docs/data/usage.json || echo '{"sessions":[]}' > docs/data/usage.json
-          
-          # 同时更新 data 目录（本地开发用）
-          mkdir -p data
-          cp docs/data/usage.json data/usage.json
-          
-          # 显示获取的数据
-          echo "=== Token Data ==="
-          cat docs/data/usage.json | head -50
-      
-      - name: ✅ Commit and push if changed
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add docs/data/usage.json data/usage.json
-          
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "📊 Auto-update token data $(date '+%Y-%m-%d %H:%M')"
-            git push
-            echo "Data updated successfully!"
-          fi
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages

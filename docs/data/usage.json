@@ -26,6 +26,33 @@
       "output": 388,
       "channel": "webchat",
       "duration": 240
+    },
+    {
+      "id": "1741449600000",
+      "timestamp": "2026-03-08T11:00:00.000Z",
+      "model": "bailian/qwen3.5-plus",
+      "input": 42000,
+      "output": 450,
+      "channel": "qqbot",
+      "duration": 180
+    },
+    {
+      "id": "1741453200000",
+      "timestamp": "2026-03-08T12:00:00.000Z",
+      "model": "bailian/qwen3.5-plus",
+      "input": 38500,
+      "output": 380,
+      "channel": "qqbot",
+      "duration": 150
+    },
+    {
+      "id": "1741460400000",
+      "timestamp": "2026-03-08T14:00:00.000Z",
+      "model": "bailian/qwen3.5-plus",
+      "input": 45000,
+      "output": 520,
+      "channel": "qqbot",
+      "duration": 200
     }
   ]
 }

@@ -116,6 +116,24 @@
       "output": 1990,
       "channel": "qqbot",
       "duration": 0
+    },
+    {
+      "id": "bd29fa10-4087-4ba0-8fbe-60298a9b0f8e",
+      "timestamp": "2026-03-09T08:26:20.013Z",
+      "model": "bailian/qwen3.5-plus",
+      "input": 2524896,
+      "output": 49097,
+      "channel": "unknown",
+      "duration": 0
+    },
+    {
+      "id": "f9587e38-e895-41e5-bfb0-9c2f0fb0c1d5",
+      "timestamp": "2026-03-09T08:26:20.125Z",
+      "model": "bailian/qwen3.5-plus",
+      "input": 2457189,
+      "output": 54974,
+      "channel": "unknown",
+      "duration": 0
     }
   ]
 }

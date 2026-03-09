@@ -134,6 +134,15 @@
       "output": 54974,
       "channel": "unknown",
       "duration": 0
+    },
+    {
+      "id": "61f60f24-34e9-47ca-b44e-fa944008e247",
+      "timestamp": "2026-03-09T12:44:53.982Z",
+      "model": "bailian/qwen3.5-plus",
+      "input": 85874,
+      "output": 2354,
+      "channel": "unknown",
+      "duration": 0
     }
   ]
 }

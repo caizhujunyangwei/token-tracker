@@ -107,6 +107,15 @@
       "output": 847,
       "channel": "unknown",
       "duration": 0
+    },
+    {
+      "id": "0ca3075d-b002-492b-be5b-c6eec7fde453",
+      "timestamp": "2026-03-09T07:30:59.155Z",
+      "model": "bailian/qwen3.5-plus",
+      "input": 302467,
+      "output": 1990,
+      "channel": "qqbot",
+      "duration": 0
     }
   ]
 }
